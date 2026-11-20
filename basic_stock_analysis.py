@@ -135,7 +135,7 @@ class BasicAnalysis:
             return
         else:
             df = pd.DataFrame(data)
-            df.T.to_csv("test_file.csv")
+            df.T.to_csv("price_data_file.csv")
             
 
 
