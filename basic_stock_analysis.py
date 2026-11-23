@@ -1,84 +1,89 @@
 import yfinance as yf
 import numpy as np
-import csv
 import pandas as pd
 from tkinter import *
-from tkinter import messagebox, ttk
+from tkinter import messagebox
+import customtkinter as ctk
 
 class BasicAnalysis:
     def __init__(self):
-        window = Tk()
-        window.geometry('850x400') # Sets apropriate window size
-        window.title("Basic stock analysis") 
-        window.configure(bg="#1e1f26")
         # Create input box for ticker and labels
-        label_style= {
-            "font": ("Helvetica", 12),
-            "bg": "#1e1f26",
-            "fg": "white"
-        }
-        Label(window, text= "Please enter the ticker you want: ", **label_style).grid(row= 2,
-                                                                       column= 1, sticky=W)
-        Label(window, text= "Daily average return: ", **label_style).grid(row= 3,
-                                                                    column= 1, sticky=W)
-        Label(window, text= "Daily standard deviation: ", **label_style).grid(row= 4,
-                                                                      column= 1, sticky=W) 
-        Label(window, text="Please select a time period: ", **label_style).grid(row=7, 
-                                                                 column=1, sticky=W)
-        Label(window, text="Correlation", **label_style).grid(row=2,
-                                               column=4,)
-        Label(window, text="Total return for the period:", **label_style).grid(row=6,
-                                                                column=1, sticky=W)
-        # Take the input to display information
-        self.an_ticker = StringVar()
-        Entry(window, textvariable= self.an_ticker, justify=RIGHT, bg="#595c6e", fg="white").grid(row=2, column=2) 
 
-        self.an_ticker_2 = StringVar()
-        Entry(window, textvariable= self.an_ticker_2, justify=RIGHT, bg="#595c6e", fg="white").grid(row=2, column=3)
+        ctk.set_appearance_mode("system")
+        ctk.set_default_color_theme("blue")
+        app = ctk.CTk()
+        app.geometry('950x450')
+        app.title("Basic stock analysis")
+        label_style = {
+            "font": ctk.CTkFont(family="Helvetica", size=12),
+        }
+        grid_style = {
+            "padx": 10,
+            "pady": 6,
+        }
+        ctk.CTkLabel(app, text="Stock comparison", ).grid(row=0, column=0, columnspan=4, padx=10, pady=6, sticky=W)
+        ctk.CTkLabel(app, text= "Please enter the ticker you want: ", **label_style).grid(row= 2,
+                                                                       column= 1, sticky=W, **grid_style)
+        ctk.CTkLabel(app, text= "Daily average return: ", **label_style).grid(row= 3,
+                                                                    column= 1, sticky=W, **grid_style)
+        ctk.CTkLabel(app, text= "Daily standard deviation: ", **label_style).grid(row= 4,
+                                                                      column= 1, sticky=W, **grid_style) 
+        ctk.CTkLabel(app, text="Please select a time period: ", **label_style).grid(row=6, 
+                                                                 column=1, sticky=W, **grid_style)
+        ctk.CTkLabel(app, text="Correlation", **label_style).grid(row=2,
+                                               column=4, **grid_style)
+        ctk.CTkLabel(app, text="Total return for the period:", **label_style).grid(row=5,
+                                                                column=1, sticky=W, **grid_style)
+        # Take the input to display information
+        self.entry1 = ctk.CTkEntry(app, placeholder_text="e.g. MSFT", justify=RIGHT, **label_style)
+        self.entry1.grid(row=2, column=2, **grid_style) 
+
+        self.entry2 = ctk.CTkEntry(app, placeholder_text="e.g. AAPL", justify=RIGHT, **label_style)
+        self.entry2.grid(row=2, column=3, **grid_style)
 
         self.avr = StringVar()
-        Label(window, textvariable=self.avr, fg="white", bg="#1e1f26").grid(row=3, 
-                                                                       column=2, sticky=E)
+        ctk.CTkLabel(app, textvariable=self.avr, **label_style).grid(row=3, 
+                                                                       column=2, sticky=E, **grid_style)
         self.avr_2 = StringVar()
-        Label(window, textvariable=self.avr_2, fg="white", bg="#1e1f26").grid(row=3, 
-                                                                           column=3, sticky=E)
+        ctk.CTkLabel(app, textvariable=self.avr_2, **label_style).grid(row=3, 
+                                                                           column=3, sticky=E, **grid_style)
 
         self.stdDev_result = StringVar()
-        Label(window, textvariable=self.stdDev_result, fg="white", bg="#1e1f26").grid(row=4, 
-                                                                              column=2, sticky=E)
+        ctk.CTkLabel(app, textvariable=self.stdDev_result, **label_style).grid(row=4, 
+                                                                              column=2, sticky=E, **grid_style)
         self.stdDev_result_2 = StringVar()
-        Label(window, textvariable=self.stdDev_result_2, fg="white", bg="#1e1f26").grid(row=4, 
-                                                                              column=3, sticky=E)
+        ctk.CTkLabel(app, textvariable=self.stdDev_result_2, **label_style).grid(row=4, 
+                                                                              column=3, sticky=E, **grid_style)
         self.correl = StringVar()
-        Label(window, textvariable=self.correl, fg="white", bg="#1e1f26").grid(row=3, 
-                                                                       column=4, sticky=E)
+        ctk.CTkLabel(app, textvariable=self.correl, **label_style).grid(row=3, 
+                                                                       column=4, sticky=E, **grid_style)
         self.total_return_1 = StringVar()
-        Label(window, textvariable=self.total_return_1, fg="white", bg="#1e1f26").grid(row=6,
-                                                                              column=2, sticky=E)
+        ctk.CTkLabel(app, textvariable=self.total_return_1, **label_style).grid(row=5,
+                                                                              column=2, sticky=E, **grid_style)
         self.total_return_2 = StringVar()
-        Label(window, textvariable=self.total_return_2, fg="white", bg="#1e1f26").grid(row=6,
-                                                                              column=3, sticky=E)
-        Label(window, text="Ticker 1").grid(row=1, column=2)
-        Label(window, text="Ticker 2").grid(row=1, column=3)
+        ctk.CTkLabel(app, textvariable=self.total_return_2, **label_style).grid(row=5,
+                                                                              column=3, sticky=E, **grid_style)
+        ctk.CTkLabel(app, text="Ticker 1", **label_style).grid(row=1, column=2, **grid_style)
+        ctk.CTkLabel(app, text="Ticker 2", **label_style).grid(row=1, column=3, **grid_style)
 
         # Create the buttons to initiate the analysis and change time period and selection for csv export
-        Button(window, text= "See analysis",  command=self.run_analysis
-                            ).grid(row=8,column=4, sticky=E,)
+        ctk.CTkButton(app, text= "See analysis",  command=self.run_analysis
+                            ).grid(row=8,column=4, sticky=E, **grid_style)
 
-        Button(window, text="Export price data to csv", 
-                   command=self.get_csv_data).grid(row=9, column=4, sticky=E)
+        ctk.CTkButton(app, text="Export price data to csv", 
+                   command=self.get_csv_data).grid(row=9, column=4, sticky=E, padx=10)
         period_choices = ("1mo", "3mo", "6mo", "1y", "max")
         self.period = StringVar(value="1mo")
-        choice_box = ttk.Combobox(window, textvariable=self.period, values=period_choices, 
+        choice_box = ctk.CTkComboBox(app, variable=self.period, values=list(period_choices), 
                                   state="readonly")
-        choice_box.grid(row=7, column=2, sticky=W)
+        choice_box.grid(row=6, column=2, sticky=W, **grid_style)
     
-        window.mainloop()
+        app.mainloop()
 
     def get_ticker_prices(self):
         """From a ticker get the prices in a data frame"""
-        symbol = self.an_ticker.get().upper().strip()
-        symbol_2 = self.an_ticker_2.get().upper().strip()
+        symbol = self.entry1.get().upper().strip()
+        symbol_2 = self.entry2.get().upper().lower()
         t_period = self.period.get()
         ticker = yf.Ticker(symbol)
         ticker_2 = yf.Ticker(symbol_2)
@@ -137,10 +142,6 @@ class BasicAnalysis:
             df = pd.DataFrame(data)
             df.T.to_csv("price_data_file.csv")
             
-
-
-
-
 if __name__ == "__main__":
     BasicAnalysis()
 
