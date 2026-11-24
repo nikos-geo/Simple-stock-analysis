@@ -4,7 +4,7 @@ import pandas as pd
 from tkinter import *
 from tkinter import messagebox
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import customtkinter as ctk
 
 class BasicAnalysis:
@@ -90,7 +90,7 @@ class BasicAnalysis:
     def get_ticker_prices(self):
         """From a ticker get the prices in a data frame"""
         symbol = self.entry1.get().upper().strip()
-        symbol_2 = self.entry2.get().upper().lower()
+        symbol_2 = self.entry2.get().upper().strip()
         t_period = self.period.get()
         ticker = yf.Ticker(symbol)
         ticker_2 = yf.Ticker(symbol_2)
@@ -134,10 +134,20 @@ class BasicAnalysis:
         self.stdDev_result.set(f'{std_1:.2f}%')
         self.stdDev_result_2.set(f'{std_2:.2f}%')
 
-        r1.index = r1.index.tz_localize(None).normalize()
-        r2.index = r2.index.tz_localize(None).normalize()
-        correlation = r1.corr(r2)
-        self.correl.set(f'{correlation:.2f}')
+        p1 = norm1.copy()
+        p2 = norm2.copy()
+
+        p1.index = p1.index.tz_localize(None).normalize()
+        p2.index = p2.index.tz_localize(None).normalize()
+        aligned = pd.concat([p1, p2], axis=1, join="inner")
+        aligned_returns = aligned.pct_change().dropna()
+        correlation = aligned_returns.iloc[:, 0].corr(aligned_returns.iloc[:, 1])
+        n_obs = len(aligned_returns)
+
+        if n_obs < 3:
+            self.correl.set("N/A")
+        else:
+            self.correl.set(f'{correlation:.2f} (n={n_obs})')
 
         self.total_return_1.set(f'{tr1:.2f}%')
         self.total_return_2.set(f'{tr2:.2f}%')
@@ -148,7 +158,7 @@ class BasicAnalysis:
         self.plot1.plot(norm2, color="#F39C4A", linewidth = 1, label=f"{symbol2.upper()}")
         self.plot1.set_ylabel("Normalized prices", color='#DCE4EE')
         self.plot1.spines['bottom'].set_color("#DCE4EE")
-        self.plot1.spines['top'].set_color("#DCE4EE")
+        self.plot1.spines['top'].set_color("#DCE4EE") 
         self.plot1.spines['right'].set_color("#DCE4EE")
         self.plot1.spines['left'].set_color("#DCE4EE")
         self.plot1.axes.get_xaxis().set_ticks([])
