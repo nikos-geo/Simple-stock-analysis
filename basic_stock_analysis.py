@@ -16,6 +16,7 @@ class BasicAnalysis:
         self.app = ctk.CTk()
         self.app.geometry('1200x950')
         self.app.title("Basic stock analysis")
+
         label_style = {
             "font": ctk.CTkFont(family="Helvetica", size=14),
         }
@@ -23,6 +24,7 @@ class BasicAnalysis:
             "padx": 10,
             "pady": 6,
         }
+
         ctk.CTkLabel(self.app, text="Stock comparison", ).grid(row=0, column=0, columnspan=4, padx=10, pady=6, sticky=W)
         ctk.CTkLabel(self.app, text= "Please enter the ticker you want: ", **label_style).grid(row= 2,
                                                                        column= 1, sticky=W, **grid_style)
@@ -105,7 +107,7 @@ class BasicAnalysis:
         ctk.CTkLabel(self.app, text="Adjust 2 stock portfolio weights", **label_style).grid(row=9,
                                                                                             column=1, **grid_style)
         self.slider = ctk.CTkSlider(self.app, from_=0, to=1, number_of_steps=100,
-                                    command=self.calculate_portfolio_returns)
+                                    command=self.calculate_portfolio_weights)
         self.slider.set(0.5)
         self.slider.grid(row=9,column=2, sticky=W, **grid_style)
         self.weight_text = StringVar(value="Ticker 1 50% / Ticker 2 50%")
@@ -224,10 +226,12 @@ class BasicAnalysis:
 
         self.canvas.get_tk_widget().grid(row=14, column=1, rowspan=10, columnspan=3, sticky=NSEW, padx=10, pady=6)
 
-        data_w = self.calculate_portfolio_returns(self.slider.get())
+        data_w = self.calculate_portfolio_weights(self.slider.get())
         w1, w2 = data_w
         portfolio_r = (w1 * annual_r1) + (w2 * annual_r2)
+        portfolio_v = np.sqrt((w1 ** 2) * (annual_std1 ** 2 ) + (w2 ** 2) * (annual_std2 ** 2) + (correlation * 2 * w1 * w2 * annual_std1 * annual_std2))
         self.port_return.set(f'{portfolio_r:.2f}%')
+        self.port_volatility.set(f'{portfolio_v:.2f}%')
         
         return average_r1, average_r2, std_1, std_2, correlation, tr1, tr2
 
@@ -243,7 +247,7 @@ class BasicAnalysis:
             df[f'{symbol2}'] = prices2
             df.to_csv("price_data_file.csv")
 
-    def calculate_portfolio_returns(self, value):
+    def calculate_portfolio_weights(self, value):
         """Determine the weights based on user input """
         w1 = value
         w2 = 1 - value
